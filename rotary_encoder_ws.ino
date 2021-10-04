@@ -10,7 +10,6 @@ using MyEncoderManager = RotaryEncoder::EncoderManager<confs,4U,int32_t>;
 
 void setup()
 {
-    Serial.begin(9600);
 	MyEncoderManager::begin();
 }
 

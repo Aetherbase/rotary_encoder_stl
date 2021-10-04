@@ -1,5 +1,5 @@
 #pragma once
-//
+//Maintainer INFO: Harsh Davda <mailto:harsh.davda@gmail.com>
 namespace RotaryEncoder
 {
     
@@ -29,8 +29,6 @@ pos_t RotaryEncoder_t<conf,pos_t,enc_id>::pos = 0;
 template<EncoderConf* conf,typename pos_t,size_t enc_id_rev,size_t count>
 struct EncoderInitializer{
     static void init(){
-        Serial.print("Initializing encoder id: ");
-        Serial.println(count-enc_id_rev);
         RotaryEncoder_t<conf,pos_t,count-enc_id_rev>::init();
         EncoderInitializer<conf,pos_t,enc_id_rev-1,count>::init();
     }
@@ -38,8 +36,6 @@ struct EncoderInitializer{
 template<EncoderConf* conf,typename pos_t,size_t count>
 struct EncoderInitializer<conf,pos_t,1,count>{
     static void init(){
-      Serial.print("Initializing encoder id: ");
-        Serial.println(count-1);
         RotaryEncoder_t<conf,pos_t,count-1>::init();
     }
 };
