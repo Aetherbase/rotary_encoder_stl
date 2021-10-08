@@ -16,6 +16,8 @@ void setup()
 void loop()
 {
     int32_t pos;
-	// MyEncoderManager::fetchPosition<0>(pos);
+    int32_t posArray[4];
+	MyEncoderManager::fetchPosition<0>(pos);
+    MyEncoderManager::fetchPosition(posArray);
     delay(1000);
 }
