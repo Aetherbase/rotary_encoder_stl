@@ -24,6 +24,8 @@ class RotaryEncoder_t{
     friend struct EncoderManager;
     template<const EncoderConf* const  ,typename ,size_t ,size_t >
     friend class EncoderInitializer;
+    template<const EncoderConf* const  ,typename ,size_t ,size_t >
+    friend class EncoderPosFetch;
     static pos_t pos;
     static_assert(enc_conf.dirType !=DirType::NONE,"Specify Direction type for all the encoders");
     static void init(){
@@ -64,6 +66,27 @@ class EncoderInitializer<conf,pos_t,1,count>{
     }
 };
 
+template<const EncoderConf* const conf,typename pos_t,size_t enc_id_rev,size_t count>
+class EncoderPosFetch{
+    template<const EncoderConf* const ,size_t ,typename >
+    friend struct EncoderManager;
+    template<const EncoderConf* const ,typename ,size_t ,size_t >
+    friend class EncoderPosFetch;
+    static void fetchPos(pos_t* posArray){
+        posArray[count-enc_id_rev] = RotaryEncoder_t<conf,pos_t,count-enc_id_rev>::pos;
+        EncoderPosFetch<conf,pos_t,enc_id_rev-1,count>::fetchPos(posArray);
+    }
+};
+template<const EncoderConf* const conf,typename pos_t,size_t count>
+class EncoderPosFetch<conf,pos_t,1,count>{
+    template<const EncoderConf* const  ,size_t ,typename >
+    friend struct EncoderManager;
+    template<const EncoderConf* const  ,typename ,size_t ,size_t >
+    friend class EncoderPosFetch;
+    static void fetchPos(pos_t* posArray){
+        posArray[count-1] = RotaryEncoder_t<conf,pos_t,count-1>::pos;
+    }
+};
 
 template<const EncoderConf* const encoderConfs,size_t count,typename pos_t>
 struct EncoderManager{
@@ -74,6 +97,9 @@ struct EncoderManager{
     static void fetchPosition(pos_t& pos){
         static_assert(enc_id<count,"id should be less than count");
         pos=RotaryEncoder_t<encoderConfs,pos_t,enc_id>::pos;
+    }
+    static void fetchPosition(pos_t* posArray){
+        EncoderPosFetch<encoderConfs,pos_t,count,count>::fetchPos(posArray);
     }
 };
 
