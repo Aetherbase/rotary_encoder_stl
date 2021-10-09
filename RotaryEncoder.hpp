@@ -32,7 +32,7 @@ class RotaryEncoder_t{
     friend class EncoderInitializer;
     template<const EncoderConf* const  ,typename ,size_t ,size_t >
     friend class EncoderPosFetch;
-    template <const MotorEncoderFeedbackConf& conf, typename pos_t, typename vel_t>
+    template <const MotorEncoderFeedbackConf& , typename , typename >
     friend class MotorEncoderFeedback;
     static pos_t pos;
     static_assert(enc_conf.dirType !=DirType::NONE,"Specify Direction type for all the encoders");
