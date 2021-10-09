@@ -17,15 +17,23 @@ struct EncoderConf{
     const DirType dirType;
 };
 
-template <const EncoderConf* const conf,typename pos_t,size_t enc_id>
+struct MotorEncoderFeedbackConf{
+    EncoderConf encoder;
+    uint8_t dirPin,pwmPin;
+    bool reverse;
+};
+
+template <const EncoderConf& conf,typename pos_t>
 class RotaryEncoder_t{
-    static constexpr EncoderConf enc_conf=conf[enc_id];
+    static constexpr EncoderConf enc_conf=conf;
     template<const EncoderConf* const ,size_t ,typename >
     friend struct EncoderManager;
     template<const EncoderConf* const  ,typename ,size_t ,size_t >
     friend class EncoderInitializer;
     template<const EncoderConf* const  ,typename ,size_t ,size_t >
     friend class EncoderPosFetch;
+    template <const MotorEncoderFeedbackConf& conf, typename pos_t, typename vel_t>
+    friend class MotorEncoderFeedback;
     static pos_t pos;
     static_assert(enc_conf.dirType !=DirType::NONE,"Specify Direction type for all the encoders");
     static void init(){
@@ -41,28 +49,30 @@ class RotaryEncoder_t{
     }
 };
 
-template <const EncoderConf* const conf,typename pos_t,size_t enc_id>
-pos_t RotaryEncoder_t<conf,pos_t,enc_id>::pos = 0;
+template <const EncoderConf& conf,typename pos_t>
+pos_t RotaryEncoder_t<conf,pos_t>::pos = 0;
 
 template<const EncoderConf* const conf,typename pos_t,size_t enc_id_rev,size_t count>
 class EncoderInitializer{
+    constexpr static size_t enc_id = count-enc_id_rev;
     template<const EncoderConf* const ,size_t ,typename >
     friend struct EncoderManager;
     template<const EncoderConf* const ,typename ,size_t ,size_t >
     friend class EncoderInitializer;
     static void init(){
-        RotaryEncoder_t<conf,pos_t,count-enc_id_rev>::init();
+        RotaryEncoder_t<conf[enc_id],pos_t,enc_id>::init();
         EncoderInitializer<conf,pos_t,enc_id_rev-1,count>::init();
     }
 };
 template<const EncoderConf* const conf,typename pos_t,size_t count>
 class EncoderInitializer<conf,pos_t,1,count>{
+    constexpr static size_t enc_id = count-1;
     template<const EncoderConf* const  ,size_t ,typename >
     friend struct EncoderManager;
     template<const EncoderConf* const  ,typename ,size_t ,size_t >
     friend class EncoderInitializer;
     static void init(){
-        RotaryEncoder_t<conf,pos_t,count-1>::init();
+        RotaryEncoder_t<conf[enc_id],pos_t,enc_id>::init();
     }
 };
 
