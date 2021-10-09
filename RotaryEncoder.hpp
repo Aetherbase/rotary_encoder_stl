@@ -23,9 +23,9 @@ struct MotorEncoderFeedbackConf{
     bool reverse;
 };
 
-template <const EncoderConf& conf,typename pos_t>
+template <const EncoderConf* conf,typename pos_t>
 class RotaryEncoder_t{
-    static constexpr EncoderConf enc_conf=conf;
+    static constexpr EncoderConf enc_conf=*conf;
     template<const EncoderConf* const ,size_t ,typename >
     friend struct EncoderManager;
     template<const EncoderConf* const  ,typename ,size_t ,size_t >
