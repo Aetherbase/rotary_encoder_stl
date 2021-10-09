@@ -106,7 +106,7 @@ struct EncoderManager{
     template <size_t enc_id>
     static void fetchPosition(pos_t& pos){
         static_assert(enc_id<count,"id should be less than count");
-        pos=RotaryEncoder_t<encoderConfs,pos_t,enc_id>::pos;
+        pos=RotaryEncoder_t<encoderConfs+enc_id,pos_t>::pos;
     }
     static void fetchPosition(pos_t* posArray){
         EncoderPosFetch<encoderConfs,pos_t,count,count>::fetchPos(posArray);
