@@ -60,7 +60,7 @@ class EncoderInitializer{
     template<const EncoderConf* const ,typename ,size_t ,size_t >
     friend class EncoderInitializer;
     static void init(){
-        RotaryEncoder_t<conf[enc_id],pos_t,enc_id>::init();
+        RotaryEncoder_t<conf[enc_id],pos_t>::init();
         EncoderInitializer<conf,pos_t,enc_id_rev-1,count>::init();
     }
 };
@@ -72,7 +72,7 @@ class EncoderInitializer<conf,pos_t,1,count>{
     template<const EncoderConf* const  ,typename ,size_t ,size_t >
     friend class EncoderInitializer;
     static void init(){
-        RotaryEncoder_t<conf[enc_id],pos_t,enc_id>::init();
+        RotaryEncoder_t<conf[enc_id],pos_t>::init();
     }
 };
 
@@ -83,7 +83,7 @@ class EncoderPosFetch{
     template<const EncoderConf* const ,typename ,size_t ,size_t >
     friend class EncoderPosFetch;
     static void fetchPos(pos_t* posArray){
-        posArray[count-enc_id_rev] = RotaryEncoder_t<conf,pos_t,count-enc_id_rev>::pos;
+        posArray[count-enc_id_rev] = RotaryEncoder_t<conf[count-enc_id_rev],pos_t>::pos;
         EncoderPosFetch<conf,pos_t,enc_id_rev-1,count>::fetchPos(posArray);
     }
 };
@@ -94,7 +94,7 @@ class EncoderPosFetch<conf,pos_t,1,count>{
     template<const EncoderConf* const  ,typename ,size_t ,size_t >
     friend class EncoderPosFetch;
     static void fetchPos(pos_t* posArray){
-        posArray[count-1] = RotaryEncoder_t<conf,pos_t,count-1>::pos;
+        posArray[count-1] = RotaryEncoder_t<conf[count-1],pos_t>::pos;
     }
 };
 
