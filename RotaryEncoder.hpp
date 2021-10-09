@@ -23,9 +23,8 @@ struct MotorEncoderFeedbackConf{
     bool reverse;
 };
 
-template <const EncoderConf* conf,typename pos_t>
+template <const EncoderConf& conf,typename pos_t>
 class RotaryEncoder_t{
-    static constexpr EncoderConf enc_conf=*conf;
     template<const EncoderConf* const ,size_t ,typename >
     friend struct EncoderManager;
     template<const EncoderConf* const  ,typename ,size_t ,size_t >
@@ -35,12 +34,12 @@ class RotaryEncoder_t{
     template <const MotorEncoderFeedbackConf& , typename , typename >
     friend class MotorEncoderFeedback;
     static pos_t pos;
-    static_assert(enc_conf.dirType !=DirType::NONE,"Specify Direction type for all the encoders");
+    static_assert(conf.dirType !=DirType::NONE,"Specify Direction type for all the encoders");
     static void init(){
-        attachInterrupt(digitalPinToInterrupt(enc_conf.pinA),risingUpdate,RISING);
+        attachInterrupt(digitalPinToInterrupt(conf.pinA),risingUpdate,RISING);
     }
     static void risingUpdate(){
-        if(digitalRead(enc_conf.pinB)==(static_cast<uint8_t>(enc_conf.dirType)-1)){
+        if(digitalRead(conf.pinB)==(static_cast<uint8_t>(conf.dirType)-1)){
                 pos++;
             }
             else{
@@ -49,7 +48,7 @@ class RotaryEncoder_t{
     }
 };
 
-template <const EncoderConf* conf,typename pos_t>
+template <const EncoderConf& conf,typename pos_t>
 pos_t RotaryEncoder_t<conf,pos_t>::pos = 0;
 
 template<const EncoderConf* const conf,typename pos_t,size_t enc_id_rev,size_t count>
@@ -60,7 +59,7 @@ class EncoderInitializer{
     template<const EncoderConf* const ,typename ,size_t ,size_t >
     friend class EncoderInitializer;
     static void init(){
-        RotaryEncoder_t<conf+enc_id,pos_t>::init();
+        RotaryEncoder_t<conf[enc_id],pos_t>::init();
         EncoderInitializer<conf,pos_t,enc_id_rev-1,count>::init();
     }
 };
@@ -72,7 +71,7 @@ class EncoderInitializer<conf,pos_t,1,count>{
     template<const EncoderConf* const  ,typename ,size_t ,size_t >
     friend class EncoderInitializer;
     static void init(){
-        RotaryEncoder_t<conf+enc_id,pos_t>::init();
+        RotaryEncoder_t<conf[enc_id],pos_t>::init();
     }
 };
 
@@ -83,7 +82,7 @@ class EncoderPosFetch{
     template<const EncoderConf* const ,typename ,size_t ,size_t >
     friend class EncoderPosFetch;
     static void fetchPos(pos_t* posArray){
-        posArray[count-enc_id_rev] = RotaryEncoder_t<conf+(count-enc_id_rev),pos_t>::pos;
+        posArray[count-enc_id_rev] = RotaryEncoder_t<conf[count-enc_id_rev],pos_t>::pos;
         EncoderPosFetch<conf,pos_t,enc_id_rev-1,count>::fetchPos(posArray);
     }
 };
@@ -94,7 +93,7 @@ class EncoderPosFetch<conf,pos_t,1,count>{
     template<const EncoderConf* const  ,typename ,size_t ,size_t >
     friend class EncoderPosFetch;
     static void fetchPos(pos_t* posArray){
-        posArray[count-1] = RotaryEncoder_t<conf+(count-1),pos_t>::pos;
+        posArray[count-1] = RotaryEncoder_t<conf[count-1],pos_t>::pos;
     }
 };
 
@@ -106,7 +105,7 @@ struct EncoderManager{
     template <size_t enc_id>
     static void fetchPosition(pos_t& pos){
         static_assert(enc_id<count,"id should be less than count");
-        pos=RotaryEncoder_t<encoderConfs+enc_id,pos_t>::pos;
+        pos=RotaryEncoder_t<encoderConfs,pos_t,enc_id>::pos;
     }
     static void fetchPosition(pos_t* posArray){
         EncoderPosFetch<encoderConfs,pos_t,count,count>::fetchPos(posArray);
