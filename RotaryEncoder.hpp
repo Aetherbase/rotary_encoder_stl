@@ -6,8 +6,8 @@ namespace RotaryEncoder
     using PinType = uint8_t;
     enum class DirType
     {
-        RISING_CW = 1,
-        RISING_CCW = 2,
+        RISING_CW = 2,
+        RISING_CCW = 1,
 
         NONE = 0
     };
