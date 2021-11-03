@@ -60,6 +60,17 @@ namespace RotaryEncoder
             previous_pos = current_pos;
             previous_time = current_time;
         };
+        static void getTickVelocity(vel_t &velocity){
+            unsigned long current_time = 1000*millis();
+            pos_t current_pos = Encoder_t::pos;
+            unsigned long time_diff = current_time - previous_time;
+            pos_t diff_pos = current_pos - previous_pos;
+            velocity = ((vel_t)diff_pos) / ((vel_t)time_diff);
+        }
+        static void getInstantaneousVelocity(vel_t &velocity){
+            getTickVelocity(velocity);
+            velocity*=ticks_per_meter;
+        }
     };
     template <typename MotorEncoderFeedbackStatic_t, typename MEF_Traits>
     typename MotorEncoderFeedback_t<MotorEncoderFeedbackStatic_t,MEF_Traits>::vel_t\
@@ -193,6 +204,30 @@ namespace RotaryEncoder
         }
     };
 
+    template <const MotorEncoderFeedbackConf *const conf, typename MEF_Traits, size_t enc_id_rev, size_t count>
+    struct MotorEncoderVelocityFetch
+    {
+        using vel_t = typename MEF_Traits::vel_t;
+        using pos_t = typename MEF_Traits::pos_t;
+        constexpr static size_t enc_id = count - enc_id_rev;
+        static void fetchVelocity(vel_t *velArray)
+        {
+            MotorEncoderFeedback_t<MEFB_T(conf,enc_id),MEF_Traits>::getInstantaneousVelocity(velArray[enc_id]);
+            MotorEncoderVelocityFetch<conf, MEF_Traits, enc_id_rev - 1, count>::fetchVelocity(velArray);
+        }
+    };
+    template <const MotorEncoderFeedbackConf *const conf, typename MEF_Traits, size_t count>
+    struct MotorEncoderVelocityFetch<conf, MEF_Traits, 1, count>
+    {
+        using vel_t = typename MEF_Traits::vel_t;
+        using pos_t = typename MEF_Traits::pos_t;
+        constexpr static size_t enc_id = count - 1;
+        static void fetchVelocity(vel_t *velArray)
+        {
+            MotorEncoderFeedback_t<MEFB_T(conf,enc_id),MEF_Traits>::getInstantaneousVelocity(velArray[enc_id]);
+        }
+    };
+
 
     template <const MotorEncoderFeedbackConf *const confs, size_t count, typename MEF_Traits>
     struct MotorEncoderFbManager
@@ -223,6 +258,16 @@ namespace RotaryEncoder
         static void setVelocities(const vel_t *velArray)
         {
             MotorEncoderVelocitySet<confs,MEF_Traits,count,count>::setVelocity(velArray);
+        }
+        static void getInstantaneousVelocities(vel_t *velArray)
+        {
+            MotorEncoderVelocityFetch<confs,MEF_Traits,count,count>::fetchVelocity(velArray);
+        }
+        template <size_t enc_id>
+        static void getInstantaneousVelocity(vel_t &vel)
+        {
+            static_assert(enc_id<count,"id should be less than count");
+            MotorEncoderFeedback_t<MEFB_T(confs,enc_id),MEF_Traits>::getInstantaneousVelocity(vel);
         }
         static void updateVelocities()
         {

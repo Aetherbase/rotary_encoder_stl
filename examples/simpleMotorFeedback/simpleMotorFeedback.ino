@@ -36,12 +36,15 @@ void loop()
 {
     int32_t pos;
     int32_t posArray[4];
+    float vel;
+    float vels [4];
 	MyMotorEncoderFbManager::fetchPosition<0>(pos);
     MyMotorEncoderFbManager::fetchPosition(posArray);
     MyMotorEncoderFbManager::setVelocity<2>(29.0f);
     float velocities[]={2.34f,2.23f,0.03f,4.20f};
     MyMotorEncoderFbManager::setVelocities(velocities);
     MyMotorEncoderFbManager::updateVelocities();
-    
+    MyMotorEncoderFbManager::getInstantaneousVelocity<2>(vel);
+    MyMotorEncoderFbManager::getInstantaneousVelocities(vels);
     delay(1000);
 }
