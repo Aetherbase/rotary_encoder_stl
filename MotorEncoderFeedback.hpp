@@ -41,10 +41,10 @@ namespace RotaryEncoder
         {
             if (previous_time == 0)
             {
-                previous_time = millis();
+                previous_time = 1000*millis();
                 return;
             }
-            unsigned long current_time = millis();
+            unsigned long current_time = 1000*millis();
             pos_t current_pos = Encoder_t::pos;
             unsigned long time_diff = current_time - previous_time;
             pos_t diff_pos = current_pos - previous_pos;
